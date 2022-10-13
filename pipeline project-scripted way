@@ -1,0 +1,34 @@
+//node{} by default it will run in master node, if we didn't specify any name here
+//if we want to specify node, node('nodejsnode'){}, in this way
+
+node{
+
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
+
+//to get the maven version from global tool configuration
+def mavenHome = tool name: 'maven3.8.5'
+
+stage('CheckoutCodefromGithub'){
+git branch: 'development', credentialsId: 'github', url: 'https://github.com/FNFI/maven-web-application.git'
+}
+
+//to execute build we need to run with shell in groovy script,hence we need mention as sh, mvn command is available in bin directory 
+
+stage('Build'){
+sh "${mavenHome}/bin/mvn clean package"
+}
+
+stage('ExecuteSonarqubeReport'){
+sh "${mavenHome}/bin/mvn clean sonar:sonar"
+}
+
+stage('UploadArtifactintoNexusRepo'){
+sh "${mavenHome}/bin/mvn clean deploy"
+}
+
+stage('DeployApptoTomcatServer'){
+sshagent(['1278b8c2-0ed4-4c20-a97f-c23aaf54b94c']) {
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.32.40:/opt/apache-tomcat-9.0.65/webapps/"
+}
+}
+}
