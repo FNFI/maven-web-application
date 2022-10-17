@@ -1,0 +1,52 @@
+pipeline{
+
+/*agent {
+label : 'nodejsnode'
+} if we want to specify in any specific node*/
+
+agent any //it will run in master node
+
+tools{
+maven 'maven3.8.5'
+}//tools closing
+
+//get the source code from Github
+stages{
+stage('CheckOutCodefromGithub'){
+steps{
+git branch: 'development', credentialsId: 'github', url: 'https://github.com/FNFI/maven-web-application.git'
+}//steps closing
+}//stage closing
+
+//Build
+stage('Build'){
+steps{
+sh "mvn clean package"
+}//steps closing
+}//stage closing
+
+//execute sonarqube report
+stage('ExecuteSonarqubeReport'){
+steps{
+sh "mvn sonar:sonar"
+}//steps closing
+}//stage closing
+
+//upload Artifacts into nexus server
+stage('UploadArtifactstoNexus'){
+steps{
+sh "mvn clean deploy"
+}//steps closing
+}//stage closing
+
+//deploy application into tomcat server
+stage('deployapptoTomcat'){
+steps{
+sshagent(['1278b8c2-0ed4-4c20-a97f-c23aaf54b94c']) {
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.32.40:/opt/apache-tomcat-9.0.65/webapps/"
+}
+}//steps closing
+}//stage closing
+
+}//stages closing
+}//pipeline closing
