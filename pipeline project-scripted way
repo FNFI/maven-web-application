@@ -1,7 +1,7 @@
 //node{} by default it will run in master node, if we didn't specify any name here
 //if we want to specify node, node('nodejsnode'){}, in this way
 
-node{
+node('nodes'){
 
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
 
