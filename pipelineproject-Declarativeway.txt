@@ -1,6 +1,6 @@
 pipeline{
 
-agent {
+agent{
 label : 'nodes'
 } //if we want to specify in any specific node
 
