@@ -1,10 +1,10 @@
 pipeline{
 
-/*agent {
-label : 'nodejsnode'
-} if we want to specify in any specific node*/
+agent {
+label : 'nodes'
+} //if we want to specify in any specific node
 
-agent any //it will run in master node
+//agent any it will run in master node
 
 tools{
 maven 'maven3.8.5'
